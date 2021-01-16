@@ -1,0 +1,53 @@
+name: linux
+on: 
+  workflow_dispatch:
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: fastai/workflows/ssh@master
+      with:
+        ssh_key: ${{ secrets.SSH_KEY }}
+        key_file: id_ecdsa
+     - uses: actions/checkout@v2
+     - run: source script-linux.sh
+    
+      - name: Initializing environment
+        run: |
+            sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
+            docker rmi `docker images -q`
+            git config --global user.name "Samyak"
+            git config --global user.email "jainsamyak2002.sj@gmail.com"         
+            sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php* 
+            sudo -E apt-get clean 
+            sudo -E apt-get -qq update
+        
+      - name: Mkaing Dir Repo and setting up Environment
+        run: |
+            bash
+            cd 
+            mkdir bin
+            cd bin
+            curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > ~/bin/repo 
+            chmod a+x ~/bin/repo
+            cd
+            cd bin
+            git clone https://github.com/akhilnarang/scripts.git scripts
+            cd
+            bash bin/scripts/setup/android_build_env.sh
+            bash bin/scripts/setup/install_android_sdk.sh
+   
+    - name: Sync recovery source and device tree
+      run: |
+           cd
+           mkdir SHRP
+           cd SHRP
+           repo init -u git://github.com/SHRP/platform_manifest_twrp_omni.git -b v3_9.0 --depth=1
+           repo sync -j8 --force-sync --optimized-fetch --no-clone-bundle
+    
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@master
