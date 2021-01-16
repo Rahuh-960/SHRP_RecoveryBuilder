@@ -13,11 +13,11 @@ jobs:
       with:
         ssh_key: ${{ secrets.SSH_KEY }}
         key_file: id_ecdsa
-     - uses: actions/checkout@v2
-     - run: source script-linux.sh
+    - uses: actions/checkout@v2
+    - run: source script-linux.sh
     
-      - name: Initializing environment
-        run: |
+    - name: Initializing environment
+      run: |
             sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
             docker rmi `docker images -q`
             git config --global user.name "Samyak"
@@ -26,8 +26,8 @@ jobs:
             sudo -E apt-get clean 
             sudo -E apt-get -qq update
         
-      - name: Mkaing Dir Repo and setting up Environment
-        run: |
+    - name: Mkaing Dir Repo and setting up Environment
+      run: |
             bash
             cd 
             mkdir bin
