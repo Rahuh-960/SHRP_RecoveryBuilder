@@ -48,7 +48,7 @@ jobs:
             repo sync -j8 --force-sync --optimized-fetch --no-clone-bundle
             cd
             cd SHRP
-            git clone https://github.com/SHRP-Devices/device_xiaomi_jasmine_sprout.git device/xiaomi/jasmine_sprout
+            git clone https://github.com/Rahuh-960/android_device_xiaomi_jasmine_sprout-twrp.git device/xiaomi/jasmine_sprout
             
       - name: Now Lets build Ofox
         run: |
