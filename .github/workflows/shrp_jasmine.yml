@@ -1,0 +1,71 @@
+name: Wayne_OFOX 
+
+on: workflow_dispatch
+
+env:
+  TZ: Asia/Kolkata
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+       
+      - name: Checkout
+        uses: actions/checkout@master
+       
+      - name: Initializing environment
+        run: |
+            sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
+            docker rmi `docker images -q`
+            sudo apt-get remove account-plugin-facebook account-plugin-flickr account-plugin-jabber account-plugin-salut account-plugin-twitter account-plugin-windows-live account-plugin-yahoo aisleriot brltty duplicity empathy empathy-common example-content gnome-accessibility-themes gnome-contacts gnome-mahjongg gnome-mines gnome-orca gnome-screensaver gnome-sudoku gnome-video-effects gnomine landscape-common libreoffice-avmedia-backend-gstreamer libreoffice-base-core libreoffice-calc libreoffice-common libreoffice-core libreoffice-draw libreoffice-gnome libreoffice-gtk libreoffice-impress libreoffice-math libreoffice-ogltrans libreoffice-pdfimport libreoffice-style-galaxy libreoffice-style-human libreoffice-writer libsane libsane-common mcp-account-manager-uoa python3-uno rhythmbox rhythmbox-plugins rhythmbox-plugin-zeitgeist sane-utils shotwell shotwell-common telepathy-gabble telepathy-haze telepathy-idle telepathy-indicator telepathy-logger telepathy-mission-control-5 telepathy-salut totem totem-common totem-plugins printer-driver-brlaser printer-driver-foo2zjs printer-driver-foo2zjs-common printer-driver-m2300w printer-driver-ptouch printer-driver-splix
+            git config --global user.name "Samyak"
+            git config --global user.email "jainsamyak2002.sj@gmail.com"         
+            sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php* 
+            sudo -E apt-get clean 
+            sudo -E apt-get -qq update
+        
+      - name: Mkaing Dir Repo and setting up Environment
+        run: |
+            bash
+            cd 
+            mkdir bin
+            cd bin
+            curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > ~/bin/repo 
+            chmod a+x ~/bin/repo
+            cd
+            cd bin
+            git clone https://github.com/akhilnarang/scripts.git scripts
+            cd
+            bash bin/scripts/setup/android_build_env.sh
+            bash bin/scripts/setup/install_android_sdk.sh
+   
+      - name: Sync recovery source and device tree
+        run: |
+            cd
+            mkdir SHRP
+            cd SHRP
+            repo init -u git://github.com/SHRP/platform_manifest_twrp_omni.git -b v3_9.0 --depth=1
+            repo sync -j8 --force-sync --optimized-fetch --no-clone-bundle
+            cd
+            cd SHRP
+            git clone https://github.com/SHRP-Devices/device_xiaomi_jasmine_sprout.git device/xiaomi/jasmine_sprout
+            
+      - name: Now Lets build Ofox
+        run: |
+            cd
+            cd SHRP
+            source build/envsetup.sh
+            export ALLOW_MISSING_DEPENDENCIES=true
+            lunch omni_jasmine_sprout-eng
+            mka recoveryimage
+      
+      - name: Uploading using Bash Upload
+        run: |
+            cd
+            mv SHRP/out/target/product/jasmine_sprout/OrangeFox-Unofficial-wayne.img ~
+            mv SHRP/out/target/product/jasmine_sprout/OrangeFox-Unofficial-wayne.zip ~
+            curl https://bashupload.com/Ofox-Unofficial.zip --data-binary @OrangeFox-Unofficial-wayne.zip
+            curl https://bashupload.com/Ofox-Unofficial.img --data-binary @OrangeFox-Unofficial-wayne.img
+            
+            
